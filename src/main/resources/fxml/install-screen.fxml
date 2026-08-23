@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.github.adamqyang.ui.InstallScreenController"
+            prefWidth="800" prefHeight="600">
+    <top>
+        <Label text="Locate Stelvio Installation" style="-fx-font-size: 20px; -fx-font-weight: bold;">
+            <BorderPane.margin>
+                <Insets top="20" right="20" bottom="10" left="20"/>
+            </BorderPane.margin>
+        </Label>
+    </top>
+    <center>
+        <VBox spacing="12">
+            <BorderPane.margin>
+                <Insets top="0" right="20" bottom="20" left="20"/>
+            </BorderPane.margin>
+            <Label fx:id="statusLabel" text="Searching for a Stelvio installation..." wrapText="true"/>
+            <ListView fx:id="foundInstallationsListView" prefHeight="150"/>
+            <Label fx:id="selectedPathLabel" text="" wrapText="true" style="-fx-font-weight: bold;"/>
+            <Label fx:id="errorLabel" text="" wrapText="true" style="-fx-text-fill: #b00020;"/>
+            <HBox spacing="10">
+                <Button fx:id="browseButton" text="Browse..." onAction="#onBrowseClicked"/>
+                <Button fx:id="continueButton" text="Continue" onAction="#onContinueClicked" disable="true"/>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>

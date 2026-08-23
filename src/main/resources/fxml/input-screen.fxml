@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.github.adamqyang.ui.InputScreenController"
+            prefWidth="800" prefHeight="720">
+    <top>
+        <VBox>
+            <BorderPane.margin>
+                <Insets top="20" right="20" bottom="0" left="20"/>
+            </BorderPane.margin>
+            <Label text="Set Up a Solve" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+            <Label fx:id="installationLabel" text="" style="-fx-text-fill: #555555;"/>
+        </VBox>
+    </top>
+    <center>
+        <VBox spacing="10">
+            <BorderPane.margin>
+                <Insets top="10" right="20" bottom="20" left="20"/>
+            </BorderPane.margin>
+
+            <Label text="FEN"/>
+            <TextField fx:id="fenField" promptText="Paste the diagram position's FEN here"/>
+
+            <Label text="Move count (e.g. 23.0 or 31.5)"/>
+            <TextField fx:id="moveCountField" promptText="23.0"/>
+
+            <Label text="Strategy conditions (optional)"/>
+            <TextField fx:id="strategyConditionsField" promptText="e.g. fm:w&gt;=5 AND cc:Sb1&gt;=3"/>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="RAM to give Stelvio (GB):" minWidth="160"/>
+                <Spinner fx:id="ramGigabytesSpinner" prefWidth="100"/>
+            </HBox>
+
+            <Separator/>
+            <Label text="Settings" style="-fx-font-weight: bold;"/>
+
+            <CheckBox fx:id="histogramModeCheckBox" text="Histogram mode (count strategies only, don't solve)"/>
+            <CheckBox fx:id="pgnOutputCheckBox" text="Write solutions in PGN format"/>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="If king is in check:" minWidth="160"/>
+                <ComboBox fx:id="retractionModeComboBox"/>
+            </HBox>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Collision detection:" minWidth="160"/>
+                <ComboBox fx:id="collisionModeComboBox"/>
+            </HBox>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Strategy seekers:" minWidth="160"/>
+                <Spinner fx:id="numSeekersSpinner" prefWidth="100"/>
+            </HBox>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Strategy players:" minWidth="160"/>
+                <Spinner fx:id="numPlayersSpinner" prefWidth="100"/>
+            </HBox>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Stop after X cooks:" minWidth="160"/>
+                <Spinner fx:id="stopAfterXCooksSpinner" prefWidth="100"/>
+            </HBox>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Max solutions per cook:" minWidth="160"/>
+                <Spinner fx:id="maxSolutionsPerCookSpinner" prefWidth="100"/>
+            </HBox>
+
+            <HBox spacing="10">
+                <Button fx:id="moreSettingsButton" text="More settings..." disable="true"/>
+                <Button fx:id="solveButton" text="Solve" onAction="#onSolveClicked"/>
+            </HBox>
+
+            <Label fx:id="errorLabel" text="" wrapText="true" style="-fx-text-fill: #b00020;"/>
+            <Label fx:id="statusLabel" text="" wrapText="true" style="-fx-font-weight: bold;"/>
+        </VBox>
+    </center>
+</BorderPane>
