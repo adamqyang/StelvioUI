@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.github.adamqyang.ui.component.BoardView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
@@ -38,6 +39,7 @@
 
                 <Label text="FEN"/>
                 <TextField fx:id="fenField" promptText="Paste the diagram position's FEN here"/>
+                <BoardView fx:id="fenPreviewBoard"/>
 
                 <Label text="Move count (e.g. 23.0 or 31.5)"/>
                 <TextField fx:id="moveCountField" promptText="23.0"/>

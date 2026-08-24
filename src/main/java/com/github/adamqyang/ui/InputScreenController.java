@@ -3,6 +3,7 @@ package com.github.adamqyang.ui;
 import java.io.IOException;
 
 import com.github.adamqyang.chess.FenValidator;
+import com.github.adamqyang.chess.Position;
 import com.github.adamqyang.config.IniParameterDescriptions;
 import com.github.adamqyang.config.MoveCount;
 import com.github.adamqyang.config.ProblemsFileWriter;
@@ -13,6 +14,7 @@ import com.github.adamqyang.install.StelvioInstallation;
 import com.github.adamqyang.process.RamPatcher;
 import com.github.adamqyang.process.StelvioLauncher;
 import com.github.adamqyang.process.WindowsStelvioLauncher;
+import com.github.adamqyang.ui.component.BoardView;
 
 import javafx.animation.PauseTransition;
 import javafx.concurrent.Task;
@@ -34,6 +36,7 @@ public class InputScreenController {
     @FXML private Label installationLabel;
     @FXML private Button changeFolderButton;
     @FXML private TextField fenField;
+    @FXML private BoardView fenPreviewBoard;
     @FXML private TextField moveCountField;
     @FXML private TextField strategyConditionsField;
     @FXML private Spinner<Integer> ramGigabytesSpinner;
@@ -54,6 +57,8 @@ public class InputScreenController {
 
     @FXML
     public void initialize() {
+        fenField.textProperty().addListener((obs, oldValue, newValue) -> updateFenPreview(newValue));
+
         StelvioSettings defaults = new StelvioSettings();
 
         // 8 GB matches Stelvio's own documented default -Xmx in a fresh install's .bat file.
@@ -101,6 +106,24 @@ public class InputScreenController {
     public void setInstallation(StelvioInstallation installation) {
         this.installation = installation;
         installationLabel.setText("Using Stelvio " + installation.version() + " \u2014 " + installation.folder());
+    }
+
+    /**
+     * Updates the board preview as the user types. Stays quiet (leaves the
+     * board showing whatever it last had) while the FEN is mid-typing and
+     * therefore invalid - re-validating and erroring on every keystroke
+     * would be distracting rather than helpful.
+     */
+    private void updateFenPreview(String fenText) {
+        if (fenText == null || fenText.isBlank()) {
+            fenPreviewBoard.clear();
+            return;
+        }
+        try {
+            fenPreviewBoard.show(Position.fromFen(fenText));
+        } catch (IllegalArgumentException e) {
+            // Incomplete/invalid mid-typing - leave the board as it was.
+        }
     }
 
     @FXML
