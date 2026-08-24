@@ -14,6 +14,7 @@ import com.github.adamqyang.process.RamPatcher;
 import com.github.adamqyang.process.StelvioLauncher;
 import com.github.adamqyang.process.WindowsStelvioLauncher;
 
+import javafx.animation.PauseTransition;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -24,11 +25,14 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.stage.Stage;
+import javafx.util.Duration;
 import javafx.util.StringConverter;
 
 public class InputScreenController {
 
     @FXML private Label installationLabel;
+    @FXML private Button changeFolderButton;
     @FXML private TextField fenField;
     @FXML private TextField moveCountField;
     @FXML private TextField strategyConditionsField;
@@ -93,10 +97,19 @@ public class InputScreenController {
                         + "cache initialization overhead."));
     }
 
-    /** Called by InstallScreenController right after navigating here. */
+    /** Called by InstallScreenController (or MainApp, on an auto-skipped startup) right after navigating here. */
     public void setInstallation(StelvioInstallation installation) {
         this.installation = installation;
         installationLabel.setText("Using Stelvio " + installation.version() + " \u2014 " + installation.folder());
+    }
+
+    @FXML
+    private void onChangeFolderClicked() {
+        // Deliberately navigating back to the install screen here - unlike the
+        // auto-skip MainApp does at startup, this always shows its normal
+        // confirmed/searching UI, giving the user a real choice (keep, rescan,
+        // or browse) rather than bouncing straight back to this screen.
+        SceneNavigator.showView("/fxml/install-screen.fxml");
     }
 
     @FXML
@@ -149,13 +162,32 @@ public class InputScreenController {
             return;
         }
 
-        launchStelvio();
+        beginLaunchSequence();
     }
 
-    private void launchStelvio() {
+    /**
+     * Shows a brief status message, then minimizes our window and launches
+     * Stelvio - restoring and refocusing our window once Stelvio's window is
+     * closed. The short pause before minimizing (rather than minimizing
+     * immediately) exists purely so the status message actually gets a chance
+     * to render before the window disappears.
+     */
+    private void beginLaunchSequence() {
         solveButton.setDisable(true);
-        statusLabel.setText("Launching Stelvio \u2014 a new terminal window will open...");
+        statusLabel.setText("Launching Stelvio \u2014 this window will minimize and reappear "
+                + "automatically when Stelvio closes.");
 
+        Stage stage = (Stage) solveButton.getScene().getWindow();
+
+        PauseTransition delay = new PauseTransition(Duration.millis(900));
+        delay.setOnFinished(event -> {
+            stage.setIconified(true);
+            launchStelvio(stage);
+        });
+        delay.play();
+    }
+
+    private void launchStelvio(Stage stage) {
         StelvioLauncher launcher = new WindowsStelvioLauncher();
         Task<Integer> task = new Task<>() {
             @Override
@@ -165,12 +197,18 @@ public class InputScreenController {
         };
         task.setOnSucceeded(e -> {
             solveButton.setDisable(false);
+            stage.setIconified(false);
+            stage.toFront();
+            stage.requestFocus();
             int exitCode = task.getValue();
             statusLabel.setText("Stelvio finished (exit code " + exitCode + "). "
                     + "(Reading problems_out.txt comes next.)");
         });
         task.setOnFailed(e -> {
             solveButton.setDisable(false);
+            stage.setIconified(false);
+            stage.toFront();
+            stage.requestFocus();
             Throwable ex = task.getException();
             errorLabel.setText("Failed to launch Stelvio: " + (ex != null ? ex.getMessage() : "unknown error"));
         });

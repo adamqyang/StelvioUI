@@ -17,19 +17,29 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.stage.DirectoryChooser;
 
+/**
+ * Note: this controller never auto-skips itself even when a remembered
+ * installation is still valid - that decision (skip straight to the input
+ * screen) is made once, upstream, by MainApp at startup. Any time this
+ * screen IS shown - whether on first run or via the input screen's
+ * "Change Stelvio folder..." button - it always renders normally, just
+ * choosing which of two states to show: "confirmed" (a valid install is
+ * already known) or "searching" (nothing confirmed yet, or the user asked
+ * to look again).
+ */
 public class InstallScreenController {
 
     @FXML private Label statusLabel;
     @FXML private ListView<StelvioInstallation> foundInstallationsListView;
     @FXML private Label selectedPathLabel;
     @FXML private Label errorLabel;
+    @FXML private Button rescanButton;
     @FXML private Button browseButton;
     @FXML private Button continueButton;
 
     private final InstallationPreferences preferences = new InstallationPreferences();
     private StelvioInstallation selectedInstallation;
 
-    // Called automatically by FXMLLoader after the FXML fields above are injected.
     @FXML
     public void initialize() {
         foundInstallationsListView.setCellFactory(list -> new ListCell<>() {
@@ -48,18 +58,36 @@ public class InstallScreenController {
                     }
                 });
 
-        // Step 1: the remembered installation, if still valid, is instant — no scan needed.
         Optional<StelvioInstallation> remembered = preferences.loadIfStillValid();
         if (remembered.isPresent()) {
-            statusLabel.setText("Using previously confirmed installation:");
-            selectInstallation(remembered.get());
-            return;
+            showConfirmedState(remembered.get());
+        } else {
+            showSearchingState();
         }
+    }
 
-        // Step 2: nothing remembered — scan candidate folders off the JavaFX thread,
-        // since filesystem access must never block the UI thread.
+    /** A valid installation is already known - show it plainly, hide the search UI. */
+    private void showConfirmedState(StelvioInstallation installation) {
+        selectInstallation(installation);
+        statusLabel.setVisible(false);
+        statusLabel.setManaged(false);
+        foundInstallationsListView.setVisible(false);
+        foundInstallationsListView.setManaged(false);
+    }
+
+    /** Nothing confirmed (or the user asked to look again) - run the scan, show the list. */
+    private void showSearchingState() {
+        statusLabel.setVisible(true);
+        statusLabel.setManaged(true);
+        foundInstallationsListView.setVisible(true);
+        foundInstallationsListView.setManaged(true);
         statusLabel.setText("Searching common install locations...");
         runInBackground(InstallationLocator::scanCandidateLocations, this::onScanComplete);
+    }
+
+    @FXML
+    private void onRescanClicked() {
+        showSearchingState();
     }
 
     private void onScanComplete(List<StelvioInstallation> found) {

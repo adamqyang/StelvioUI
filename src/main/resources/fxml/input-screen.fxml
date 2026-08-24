@@ -5,6 +5,7 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.TextField?>
@@ -14,75 +15,83 @@
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.github.adamqyang.ui.InputScreenController"
-            prefWidth="800" prefHeight="720">
+            fx:controller="com.github.adamqyang.ui.InputScreenController">
     <top>
         <VBox>
             <BorderPane.margin>
                 <Insets top="20" right="20" bottom="0" left="20"/>
             </BorderPane.margin>
             <Label text="Set Up a Solve" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
-            <Label fx:id="installationLabel" text="" style="-fx-text-fill: #555555;"/>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label fx:id="installationLabel" text="" style="-fx-text-fill: #555555;"/>
+                <Button fx:id="changeFolderButton" text="Change Stelvio folder..." onAction="#onChangeFolderClicked"
+                        style="-fx-font-size: 11px;"/>
+            </HBox>
         </VBox>
     </top>
     <center>
-        <VBox spacing="10">
-            <BorderPane.margin>
-                <Insets top="10" right="20" bottom="20" left="20"/>
-            </BorderPane.margin>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;">
+            <VBox spacing="10">
+                <padding>
+                    <Insets top="10" right="20" bottom="20" left="20"/>
+                </padding>
 
-            <Label text="FEN"/>
-            <TextField fx:id="fenField" promptText="Paste the diagram position's FEN here"/>
+                <Label text="FEN"/>
+                <TextField fx:id="fenField" promptText="Paste the diagram position's FEN here"/>
 
-            <Label text="Move count (e.g. 23.0 or 31.5)"/>
-            <TextField fx:id="moveCountField" promptText="23.0"/>
+                <Label text="Move count (e.g. 23.0 or 31.5)"/>
+                <TextField fx:id="moveCountField" promptText="23.0"/>
 
-            <Label text="Strategy conditions (optional)"/>
-            <TextField fx:id="strategyConditionsField" promptText="e.g. fm:w&gt;=5 AND cc:Sb1&gt;=3"/>
+                <Label text="Strategy conditions (optional)"/>
+                <TextField fx:id="strategyConditionsField" promptText="e.g. fm:w&gt;=5 AND cc:Sb1&gt;=3"/>
 
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label text="RAM to give Stelvio (GB):" minWidth="160"/>
-                <Spinner fx:id="ramGigabytesSpinner" prefWidth="100"/>
-            </HBox>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="RAM to give Stelvio (GB):" minWidth="160"/>
+                    <Spinner fx:id="ramGigabytesSpinner" prefWidth="100"/>
+                </HBox>
 
-            <Separator/>
-            <Label text="Settings" style="-fx-font-weight: bold;"/>
+                <Separator/>
+                <Label text="Settings" style="-fx-font-weight: bold;"/>
 
-            <CheckBox fx:id="histogramModeCheckBox" text="Histogram mode (count strategies only, don't solve)"/>
-            <CheckBox fx:id="pgnOutputCheckBox" text="Write solutions in PGN format"/>
+                <CheckBox fx:id="histogramModeCheckBox" text="Histogram mode (count strategies only, don't solve)"/>
+                <CheckBox fx:id="pgnOutputCheckBox" text="Write solutions in PGN format"/>
 
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label text="If king is in check:" minWidth="160"/>
-                <ComboBox fx:id="retractionModeComboBox"/>
-            </HBox>
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label text="Collision detection:" minWidth="160"/>
-                <ComboBox fx:id="collisionModeComboBox"/>
-            </HBox>
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label text="Strategy seekers:" minWidth="160"/>
-                <Spinner fx:id="numSeekersSpinner" prefWidth="100"/>
-            </HBox>
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label text="Strategy players:" minWidth="160"/>
-                <Spinner fx:id="numPlayersSpinner" prefWidth="100"/>
-            </HBox>
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label text="Stop after X cooks:" minWidth="160"/>
-                <Spinner fx:id="stopAfterXCooksSpinner" prefWidth="100"/>
-            </HBox>
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label text="Max solutions per cook:" minWidth="160"/>
-                <Spinner fx:id="maxSolutionsPerCookSpinner" prefWidth="100"/>
-            </HBox>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="If king is in check:" minWidth="160"/>
+                    <ComboBox fx:id="retractionModeComboBox"/>
+                </HBox>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Collision detection:" minWidth="160"/>
+                    <ComboBox fx:id="collisionModeComboBox"/>
+                </HBox>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Strategy seekers:" minWidth="160"/>
+                    <Spinner fx:id="numSeekersSpinner" prefWidth="100"/>
+                </HBox>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Strategy players:" minWidth="160"/>
+                    <Spinner fx:id="numPlayersSpinner" prefWidth="100"/>
+                </HBox>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Stop after X cooks:" minWidth="160"/>
+                    <Spinner fx:id="stopAfterXCooksSpinner" prefWidth="100"/>
+                </HBox>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Max solutions per cook:" minWidth="160"/>
+                    <Spinner fx:id="maxSolutionsPerCookSpinner" prefWidth="100"/>
+                </HBox>
 
-            <HBox spacing="10">
-                <Button fx:id="moreSettingsButton" text="More settings..." disable="true"/>
-                <Button fx:id="solveButton" text="Solve" onAction="#onSolveClicked"/>
-            </HBox>
+                <HBox spacing="10">
+                    <Button fx:id="moreSettingsButton" text="More settings..." disable="true"/>
+                    <Button fx:id="solveButton" text="Solve" onAction="#onSolveClicked"/>
+                </HBox>
 
-            <Label fx:id="errorLabel" text="" wrapText="true" style="-fx-text-fill: #b00020;"/>
-            <Label fx:id="statusLabel" text="" wrapText="true" style="-fx-font-weight: bold;"/>
-        </VBox>
+                <Label text="Tip: while solving, click into the Stelvio window and press 's' to skip the current strategy, or Ctrl+C to cancel. This window will minimize when Stelvio begins solving. Closing the Stelvio window brings this window back automatically."
+                       wrapText="true" style="-fx-text-fill: #777777; -fx-font-size: 11px;"/>
+
+                <Label fx:id="errorLabel" text="" wrapText="true" style="-fx-text-fill: #b00020;"/>
+                <Label fx:id="statusLabel" text="" wrapText="true" style="-fx-font-weight: bold;"/>
+            </VBox>
+        </ScrollPane>
     </center>
 </BorderPane>
