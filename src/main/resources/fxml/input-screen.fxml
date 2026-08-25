@@ -82,18 +82,25 @@
                     <Label text="Max solutions per cook:" minWidth="160"/>
                     <Spinner fx:id="maxSolutionsPerCookSpinner" prefWidth="100"/>
                 </HBox>
-
+            </VBox>
+        </ScrollPane>
+    </center>
+    <bottom>
+        <VBox spacing="6" style="-fx-background-color: -fx-background;">
+            <Separator/>
+            <VBox spacing="6">
+                <padding>
+                    <Insets top="10" right="20" bottom="15" left="20"/>
+                </padding>
                 <HBox spacing="10">
                     <Button fx:id="moreSettingsButton" text="More settings..." disable="true"/>
                     <Button fx:id="solveButton" text="Solve" onAction="#onSolveClicked"/>
                 </HBox>
-
                 <Label text="Tip: while solving, click into the Stelvio window and press 's' to skip the current strategy, or Ctrl+C to cancel. This window will minimize when Stelvio begins solving. Closing the Stelvio window brings this window back automatically."
                        wrapText="true" style="-fx-text-fill: #777777; -fx-font-size: 11px;"/>
-
                 <Label fx:id="errorLabel" text="" wrapText="true" style="-fx-text-fill: #b00020;"/>
                 <Label fx:id="statusLabel" text="" wrapText="true" style="-fx-font-weight: bold;"/>
             </VBox>
-        </ScrollPane>
-    </center>
+        </VBox>
+    </bottom>
 </BorderPane>
