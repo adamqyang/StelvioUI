@@ -11,7 +11,7 @@ import com.github.adamqyang.config.SolveRequest;
 import com.github.adamqyang.config.StelvioIniPatcher;
 import com.github.adamqyang.config.StelvioSettings;
 import com.github.adamqyang.install.StelvioInstallation;
-import com.github.adamqyang.process.RamPatcher;
+import com.github.adamqyang.process.LauncherScriptPatcher;
 import com.github.adamqyang.process.StelvioLauncher;
 import com.github.adamqyang.process.WindowsStelvioLauncher;
 import com.github.adamqyang.ui.component.BoardView;
@@ -179,7 +179,7 @@ public class InputScreenController {
         try {
             ProblemsFileWriter.write(installation.folder(), request);
             StelvioIniPatcher.patch(installation.folder(), request.settings());
-            RamPatcher.patch(installation, ramGigabytesSpinner.getValue());
+            LauncherScriptPatcher.patch(installation, ramGigabytesSpinner.getValue());
         } catch (IOException e) {
             errorLabel.setText("Failed to prepare Stelvio's files: " + e.getMessage());
             return;

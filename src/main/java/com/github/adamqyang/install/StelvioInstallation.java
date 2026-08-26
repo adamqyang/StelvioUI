@@ -33,4 +33,25 @@ public record StelvioInstallation(Path folder, String version) {
         throw new IllegalStateException(
                 "No stelvio*.bat found in " + folder + " - was it moved or deleted since being selected?");
     }
+
+    /**
+     * Locates this installation's stelvio*.jar in the bin folder. Since
+     * InstallationValidator already confirmed one exists when this record
+     * was created, this should always succeed unless the file was moved or
+     * deleted afterward.
+     */
+    public Path jarFile() {
+        Path binFolder = folder.resolve("bin");
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(binFolder, "stelvio*.jar")) {
+            for (Path entry : stream) {
+                if (Files.isRegularFile(entry)) {
+                    return entry;
+                }
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not search " + binFolder + " for stelvio*.jar", e);
+        }
+        throw new IllegalStateException(
+                "No stelvio*.jar found in " + binFolder + " - was it moved or deleted since being selected?");
+    }
 }
