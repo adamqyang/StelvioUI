@@ -37,6 +37,7 @@ public class InputScreenController {
     @FXML private Button changeFolderButton;
     @FXML private TextField fenField;
     @FXML private BoardView fenPreviewBoard;
+    @FXML private Button flipBoardButton;
     @FXML private TextField moveCountField;
     @FXML private TextField strategyConditionsField;
     @FXML private Spinner<Integer> ramGigabytesSpinner;
@@ -106,6 +107,11 @@ public class InputScreenController {
     public void setInstallation(StelvioInstallation installation) {
         this.installation = installation;
         installationLabel.setText("Using Stelvio " + installation.version() + " \u2014 " + installation.folder());
+    }
+
+    @FXML
+    private void onFlipBoardClicked() {
+        fenPreviewBoard.toggleFlipped();
     }
 
     /**

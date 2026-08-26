@@ -12,8 +12,14 @@ import javafx.scene.layout.StackPane;
  * SvgPieceSet) when available, so their appearance doesn't depend on the
  * system's installed fonts. If a piece's SVG file hasn't been added yet,
  * this falls back to a Unicode glyph so the board still shows something
- * reasonable in the meantime - no code changes needed once real files land,
- * rendering upgrades automatically.
+ * reasonable in the meantime.
+ * <p>
+ * Supports flipping to Black's perspective. The physical grid (built once
+ * in buildGrid()) never moves - flipping just changes which grid cell each
+ * board square's piece gets written into, via a 180-degree index inversion
+ * computed fresh on every render. The last-shown Position is cached
+ * internally so toggling flip can re-render immediately without the caller
+ * needing to re-supply it.
  */
 public final class BoardView extends GridPane {
 
@@ -21,6 +27,9 @@ public final class BoardView extends GridPane {
     private static final double PIECE_SIZE = 44;
 
     private final StackPane[][] squares = new StackPane[Position.SIZE][Position.SIZE];
+
+    private Position currentPosition;
+    private boolean flipped;
 
     public BoardView() {
         buildGrid();
@@ -41,18 +50,43 @@ public final class BoardView extends GridPane {
 
     /** Displays the given position. */
     public void show(Position position) {
-        for (int rank = 0; rank < Position.SIZE; rank++) {
-            for (int file = 0; file < Position.SIZE; file++) {
-                renderPiece(squares[rank][file], position.pieceAt(rank, file));
-            }
-        }
+        this.currentPosition = position;
+        render();
     }
 
     /** Clears the board to all-empty squares. */
     public void clear() {
-        for (StackPane[] row : squares) {
-            for (StackPane square : row) {
-                square.getChildren().clear();
+        this.currentPosition = null;
+        render();
+    }
+
+    public boolean isFlipped() {
+        return flipped;
+    }
+
+    public void setFlipped(boolean flipped) {
+        this.flipped = flipped;
+        render();
+    }
+
+    public void toggleFlipped() {
+        setFlipped(!flipped);
+    }
+
+    private void render() {
+        if (currentPosition == null) {
+            for (StackPane[] row : squares) {
+                for (StackPane square : row) {
+                    square.getChildren().clear();
+                }
+            }
+            return;
+        }
+        for (int rank = 0; rank < Position.SIZE; rank++) {
+            for (int file = 0; file < Position.SIZE; file++) {
+                int displayRow = flipped ? Position.SIZE - 1 - rank : rank;
+                int displayCol = flipped ? Position.SIZE - 1 - file : file;
+                renderPiece(squares[displayRow][displayCol], currentPosition.pieceAt(rank, file));
             }
         }
     }
