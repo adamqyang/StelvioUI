@@ -4,10 +4,6 @@ import java.util.List;
 
 /**
  * Outcome of validating a candidate folder as a Stelvio installation.
- * <p>
- * Using a sealed interface here (rather than, say, a boolean + nullable
- * fields) means the compiler can check that every place we handle a
- * ValidationResult accounts for both possibilities.
  */
 public sealed interface ValidationResult {
 
