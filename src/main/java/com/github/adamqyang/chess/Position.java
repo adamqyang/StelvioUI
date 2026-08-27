@@ -9,7 +9,7 @@ public final class Position {
 
     public static final int SIZE = 8;
 
-    private static final char EMPTY = '.';
+    static final char EMPTY = '.';
 
     // board[rank][file]: rank 0 = rank 8 (top of a standard diagram), file 0 = the a-file.
     private final char[][] board;
@@ -53,6 +53,29 @@ public final class Position {
      */
     public char pieceAt(int rank, int file) {
         return board[rank][file];
+    }
+
+    /**
+     * Returns a fresh, independent copy of the underlying board array.
+     * Package-visible: used by Game to get a mutable starting point for
+     * replay, without exposing board mutation outside chess/.
+     */
+    char[][] copyBoard() {
+        char[][] copy = new char[SIZE][];
+        for (int i = 0; i < SIZE; i++) {
+            copy[i] = board[i].clone();
+        }
+        return copy;
+    }
+
+    /**
+     * Constructs a Position directly from a board array, bypassing FEN
+     * parsing entirely. Package-visible: used by Game, which produces
+     * board arrays directly while replaying moves rather than ever having
+     * a FEN string to parse.
+     */
+    static Position fromBoard(char[][] board) {
+        return new Position(board);
     }
 
     @Override
