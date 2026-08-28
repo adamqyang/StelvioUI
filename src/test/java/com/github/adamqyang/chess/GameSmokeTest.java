@@ -15,9 +15,6 @@ import java.util.List;
  */
 public class GameSmokeTest {
 
-    private static final String STANDARD_START =
-            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
-
     public static void main(String[] args) {
         String targetFen = "1n1q1bnr/2p1pppp/p2p2q1/1r3kBB/Q1N4K/PPPPPPPP/8/5bNR";
         String solutionLine =
@@ -26,7 +23,7 @@ public class GameSmokeTest {
                         + "14.Ke1f2 Ke8d7 15.Kf2g3 Kd7e6 16.Kg3h4 Ke6f5 17.g3 Bh3f1 18.h3";
 
         List<Move> moves = MoveNotationParser.parseMoveList(solutionLine);
-        Game game = new Game(Position.fromFen(STANDARD_START), moves);
+        Game game = new Game(Position.fromFen(Game.STANDARD_STARTING_FEN), moves);
         Position result = game.positionAfter(game.moveCount());
         Position target = Position.fromFen(targetFen);
 

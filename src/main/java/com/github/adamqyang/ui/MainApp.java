@@ -22,7 +22,7 @@ public class MainApp extends Application {
         // full picker/confirm UI rather than bouncing straight back here.
         Optional<StelvioInstallation> remembered = new InstallationPreferences().loadIfStillValid();
         if (remembered.isPresent()) {
-            InputScreenController controller = SceneNavigator.showView("/fxml/input-screen.fxml");
+            MainShellController controller = SceneNavigator.showView("/fxml/main-shell.fxml");
             controller.setInstallation(remembered.get());
         } else {
             SceneNavigator.showView("/fxml/install-screen.fxml");

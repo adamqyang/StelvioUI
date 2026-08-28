@@ -25,9 +25,9 @@ public final class SceneNavigator {
     }
 
     /**
-     * Loads the given FXML resource (classpath-relative, e.g.
-     * "/fxml/install-screen.fxml") and displays it, returning its controller
-     * in case the caller needs to pass it initial data.
+     * Loads the given FXML resource and displays it as the whole window,
+     * returning its controller in case the caller needs to pass it initial
+     * data.
      */
     public static <T> T showView(String fxmlResourcePath) {
         try {
@@ -42,5 +42,25 @@ public final class SceneNavigator {
         } catch (IOException e) {
             throw new IllegalStateException("Failed to load view: " + fxmlResourcePath, e);
         }
+    }
+
+    /**
+     * Loads the given FXML resource WITHOUT touching the primary Stage's
+     * scene - for embedding a screen's content inside another container
+     * (e.g. a tab), rather than making it the whole window. The screen's
+     * own FXML/controller are unaware of and unaffected by whichever way
+     * they end up being loaded.
+     */
+    public static <T> LoadedView<T> load(String fxmlResourcePath) {
+        try {
+            FXMLLoader loader = new FXMLLoader(SceneNavigator.class.getResource(fxmlResourcePath));
+            Parent root = loader.load();
+            return new LoadedView<>(root, loader.getController());
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to load view: " + fxmlResourcePath, e);
+        }
+    }
+
+    public record LoadedView<T>(Parent root, T controller) {
     }
 }

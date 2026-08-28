@@ -1,6 +1,8 @@
 package com.github.adamqyang.ui;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.function.BiConsumer;
 
 import com.github.adamqyang.chess.FenValidator;
 import com.github.adamqyang.chess.Position;
@@ -11,6 +13,8 @@ import com.github.adamqyang.config.SolveRequest;
 import com.github.adamqyang.config.StelvioIniPatcher;
 import com.github.adamqyang.config.StelvioSettings;
 import com.github.adamqyang.install.StelvioInstallation;
+import com.github.adamqyang.output.ProblemsOutParser;
+import com.github.adamqyang.output.SolveResult;
 import com.github.adamqyang.process.LauncherScriptPatcher;
 import com.github.adamqyang.process.StelvioLauncher;
 import com.github.adamqyang.process.WindowsStelvioLauncher;
@@ -55,6 +59,7 @@ public class InputScreenController {
     @FXML private Label statusLabel;
 
     private StelvioInstallation installation;
+    private BiConsumer<SolveResult, Path> onSolveComplete;
 
     @FXML
     public void initialize() {
@@ -107,6 +112,11 @@ public class InputScreenController {
     public void setInstallation(StelvioInstallation installation) {
         this.installation = installation;
         installationLabel.setText("Using Stelvio " + installation.version() + " \u2014 " + installation.folder());
+    }
+
+    /** Called once, by whoever embeds this screen, to be notified when a solve produces a parsed result. */
+    public void setOnSolveComplete(BiConsumer<SolveResult, Path> onSolveComplete) {
+        this.onSolveComplete = onSolveComplete;
     }
 
     @FXML
@@ -216,12 +226,26 @@ public class InputScreenController {
         delay.play();
     }
 
+    /** Bundles what the background task produces: exit code, output file path, plus a result or an error. */
+    private record SolveOutcome(int exitCode, Path outputFile, SolveResult result, String parseErrorMessage) {
+    }
+
     private void launchStelvio(Stage stage) {
         StelvioLauncher launcher = new WindowsStelvioLauncher();
-        Task<Integer> task = new Task<>() {
+        Task<SolveOutcome> task = new Task<>() {
             @Override
-            protected Integer call() throws Exception {
-                return launcher.launchAndWait(installation);
+            protected SolveOutcome call() throws Exception {
+                int exitCode = launcher.launchAndWait(installation);
+                Path outputFile = installation.folder().resolve("problems_out.txt");
+
+                SolveResult result = null;
+                String parseError = null;
+                try {
+                    result = ProblemsOutParser.parse(outputFile);
+                } catch (Exception e) {
+                    parseError = "Stelvio finished, but its output couldn't be read: " + e.getMessage();
+                }
+                return new SolveOutcome(exitCode, outputFile, result, parseError);
             }
         };
         task.setOnSucceeded(e -> {
@@ -229,9 +253,18 @@ public class InputScreenController {
             stage.setIconified(false);
             stage.toFront();
             stage.requestFocus();
-            int exitCode = task.getValue();
-            statusLabel.setText("Stelvio finished (exit code " + exitCode + "). "
-                    + "(Reading problems_out.txt comes next.)");
+
+            SolveOutcome outcome = task.getValue();
+            if (outcome.parseErrorMessage() != null) {
+                errorLabel.setText(outcome.parseErrorMessage());
+                statusLabel.setText("Stelvio finished (exit code " + outcome.exitCode() + ").");
+                return;
+            }
+
+            statusLabel.setText("Stelvio finished (exit code " + outcome.exitCode() + "). See the Results tab.");
+            if (onSolveComplete != null) {
+                onSolveComplete.accept(outcome.result(), outcome.outputFile());
+            }
         });
         task.setOnFailed(e -> {
             solveButton.setDisable(false);

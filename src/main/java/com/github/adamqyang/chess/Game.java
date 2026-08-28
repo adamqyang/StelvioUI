@@ -18,6 +18,14 @@ import java.util.List;
  */
 public final class Game {
 
+    /**
+     * The standard chess starting position, in Stelvio's piece-placement-only
+     * FEN form. Solution replay always starts here, never from the diagram
+     * FEN - that's the entire premise of a proof game: proving a path FROM
+     * the standard start TO the diagram position.
+     */
+    public static final String STANDARD_STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+
     private final List<Move> moves;
     private final List<Position> positions; // positions.get(0) = start; positions.get(i) = after moves.get(i-1)
 

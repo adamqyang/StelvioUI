@@ -136,8 +136,8 @@ public class InstallScreenController {
             return;
         }
         preferences.remember(selectedInstallation);
-        InputScreenController nextController = SceneNavigator.showView("/fxml/input-screen.fxml");
-        nextController.setInstallation(selectedInstallation);
+        MainShellController shellController = SceneNavigator.showView("/fxml/main-shell.fxml");
+        shellController.setInstallation(selectedInstallation);
     }
 
     /** Runs {@code work} off the JavaFX Application Thread, delivering the result back on it. */
