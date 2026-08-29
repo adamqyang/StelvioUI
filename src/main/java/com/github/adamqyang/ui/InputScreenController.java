@@ -59,7 +59,7 @@ public class InputScreenController {
     @FXML private Label statusLabel;
 
     private StelvioInstallation installation;
-    private BiConsumer<SolveResult, Path> onSolveComplete;
+    private BiConsumer<SolveResult, SolveContext> onSolveComplete;
 
     @FXML
     public void initialize() {
@@ -115,7 +115,7 @@ public class InputScreenController {
     }
 
     /** Called once, by whoever embeds this screen, to be notified when a solve produces a parsed result. */
-    public void setOnSolveComplete(BiConsumer<SolveResult, Path> onSolveComplete) {
+    public void setOnSolveComplete(BiConsumer<SolveResult, SolveContext> onSolveComplete) {
         this.onSolveComplete = onSolveComplete;
     }
 
@@ -201,7 +201,7 @@ public class InputScreenController {
             return;
         }
 
-        beginLaunchSequence();
+        beginLaunchSequence(request.fen());
     }
 
     /**
@@ -210,8 +210,14 @@ public class InputScreenController {
      * closed. The short pause before minimizing (rather than minimizing
      * immediately) exists purely so the status message actually gets a chance
      * to render before the window disappears.
+     *
+     * @param originalFen captured from the just-submitted request, not
+     *                     re-read from fenField later - the field remains
+     *                     editable while Stelvio runs, so reading it after
+     *                     the fact could report a different value than what
+     *                     was actually solved.
      */
-    private void beginLaunchSequence() {
+    private void beginLaunchSequence(String originalFen) {
         solveButton.setDisable(true);
         statusLabel.setText("Launching Stelvio \u2014 this window will minimize and reappear "
                 + "automatically when Stelvio closes.");
@@ -221,7 +227,7 @@ public class InputScreenController {
         PauseTransition delay = new PauseTransition(Duration.millis(900));
         delay.setOnFinished(event -> {
             stage.setIconified(true);
-            launchStelvio(stage);
+            launchStelvio(stage, originalFen);
         });
         delay.play();
     }
@@ -230,7 +236,7 @@ public class InputScreenController {
     private record SolveOutcome(int exitCode, Path outputFile, SolveResult result, String parseErrorMessage) {
     }
 
-    private void launchStelvio(Stage stage) {
+    private void launchStelvio(Stage stage, String originalFen) {
         StelvioLauncher launcher = new WindowsStelvioLauncher();
         Task<SolveOutcome> task = new Task<>() {
             @Override
@@ -263,7 +269,7 @@ public class InputScreenController {
 
             statusLabel.setText("Stelvio finished (exit code " + outcome.exitCode() + "). See the Results tab.");
             if (onSolveComplete != null) {
-                onSolveComplete.accept(outcome.result(), outcome.outputFile());
+                onSolveComplete.accept(outcome.result(), new SolveContext(outcome.outputFile(), originalFen));
             }
         });
         task.setOnFailed(e -> {

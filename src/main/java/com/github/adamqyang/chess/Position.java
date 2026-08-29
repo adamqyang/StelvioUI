@@ -78,6 +78,37 @@ public final class Position {
         return new Position(board);
     }
 
+    /**
+     * Serializes back to Stelvio's piece-placement-only FEN form - the
+     * direct inverse of fromFen()'s parsing: run-length-encode consecutive
+     * empty squares, join ranks with "/".
+     */
+    public String toFen() {
+        StringBuilder sb = new StringBuilder();
+        for (int rank = 0; rank < SIZE; rank++) {
+            int emptyRun = 0;
+            for (int file = 0; file < SIZE; file++) {
+                char piece = board[rank][file];
+                if (piece == EMPTY) {
+                    emptyRun++;
+                } else {
+                    if (emptyRun > 0) {
+                        sb.append(emptyRun);
+                        emptyRun = 0;
+                    }
+                    sb.append(piece);
+                }
+            }
+            if (emptyRun > 0) {
+                sb.append(emptyRun);
+            }
+            if (rank < SIZE - 1) {
+                sb.append('/');
+            }
+        }
+        return sb.toString();
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

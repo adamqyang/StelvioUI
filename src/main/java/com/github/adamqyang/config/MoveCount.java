@@ -48,6 +48,19 @@ public final class MoveCount {
         return new MoveCount(halfMoves);
     }
 
+    /**
+     * Constructs a MoveCount directly from a known half-move count (e.g.
+     * a parsed solution's move list size), skipping parse()'s validation
+     * entirely - that validation exists to catch bad user-typed input, and
+     * would be wrong to apply here: we're formatting an already-solved
+     * result for display, not validating a new request, so this should
+     * never refuse to render a length just because it happens to be
+     * unusual.
+     */
+    public static MoveCount ofHalfMoves(int halfMoves) {
+        return new MoveCount(halfMoves);
+    }
+
     /** The raw half-move count, as written to problems.txt. */
     public int halfMoves() {
         return halfMoves;

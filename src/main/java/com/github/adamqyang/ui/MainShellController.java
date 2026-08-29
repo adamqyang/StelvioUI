@@ -42,8 +42,8 @@ public class MainShellController {
         // Task's succeeded handler (where this callback ultimately fires from)
         // already runs on the JavaFX Application Thread, so it's safe to touch
         // the UI directly here - no Platform.runLater needed.
-        inputController.setOnSolveComplete((result, outputFile) -> {
-            resultsController.showResult(result, outputFile);
+        inputController.setOnSolveComplete((result, context) -> {
+            resultsController.showResult(result, context);
             showResultsTab();
         });
     }

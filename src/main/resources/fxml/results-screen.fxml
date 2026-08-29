@@ -6,7 +6,10 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
@@ -40,6 +43,26 @@
                             <Button fx:id="lastMoveButton" text="&gt;|" onAction="#onLastMoveClicked" disable="true"/>
                         </HBox>
                     </VBox>
+                    <ScrollPane prefWidth="220" prefHeight="400" fitToWidth="true">
+                        <FlowPane fx:id="moveListPane" hgap="6" vgap="6"/>
+                    </ScrollPane>
+                </HBox>
+
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Target FEN:" minWidth="130"/>
+                    <TextField fx:id="originalFenField" editable="false" HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="copyOriginalFenButton" text="Copy" onAction="#onCopyOriginalFenClicked"/>
+                </HBox>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Current position FEN:" minWidth="130"/>
+                    <TextField fx:id="currentFenField" editable="false" HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="copyCurrentFenButton" text="Copy" onAction="#onCopyCurrentFenClicked"/>
+                </HBox>
+                <HBox spacing="10" alignment="TOP_LEFT">
+                    <Label text="PGN (this solution):" minWidth="130"/>
+                    <TextArea fx:id="pgnTextArea" editable="false" wrapText="true"
+                              prefRowCount="3" HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="copyPgnButton" text="Copy" onAction="#onCopyPgnClicked"/>
                 </HBox>
 
                 <Label fx:id="errorLabel" text="" wrapText="true" style="-fx-text-fill: #b00020;"/>
