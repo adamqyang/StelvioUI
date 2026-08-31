@@ -17,7 +17,7 @@ public record SolveResult(
         String solvingTime // raw text, e.g. "00:00:01 seconds"; null if the file didn't include it
 ) {
     public enum Verdict {
-        CORRECT, COOKED
+        CORRECT, COOKED, NO_SOLUTION
     }
 
     /**

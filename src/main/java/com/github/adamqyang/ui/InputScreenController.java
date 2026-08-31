@@ -15,6 +15,7 @@ import com.github.adamqyang.config.StelvioSettings;
 import com.github.adamqyang.install.StelvioInstallation;
 import com.github.adamqyang.output.ProblemsOutParser;
 import com.github.adamqyang.output.SolveResult;
+import com.github.adamqyang.output.StelvioCrashException;
 import com.github.adamqyang.process.LauncherScriptPatcher;
 import com.github.adamqyang.process.StelvioLauncher;
 import com.github.adamqyang.process.WindowsStelvioLauncher;
@@ -248,6 +249,10 @@ public class InputScreenController {
                 String parseError = null;
                 try {
                     result = ProblemsOutParser.parse(outputFile);
+                } catch (StelvioCrashException e) {
+                    // Already a specific, actionable message (e.g. "add more RAM") -
+                    // pass it through directly rather than wrapping it.
+                    parseError = e.getMessage();
                 } catch (Exception e) {
                     parseError = "Stelvio finished, but its output couldn't be read: " + e.getMessage();
                 }

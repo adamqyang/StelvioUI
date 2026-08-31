@@ -85,14 +85,28 @@ public class ResultsScreenController {
         originalFenField.setText(context.originalFen());
         errorLabel.setText("");
 
-        String verdictText = result.verdict() == SolveResult.Verdict.CORRECT ? "correct" : "cooked";
         StringBuilder text = new StringBuilder();
-        text.append("Found ").append(result.solutionCount())
-                .append(" solution").append(result.solutionCount() == 1 ? "" : "s");
-        if (result.solvingTime() != null) {
-            text.append(" in ").append(result.solvingTime());
+        if (result.verdict() == SolveResult.Verdict.NO_SOLUTION) {
+            text.append("No solution found for this position");
+            if (result.solvingTime() != null) {
+                // solvingTime already ends with its own period (e.g. "00:00:14
+                // seconds.") - taken as-is from the file, same as Stelvio's own
+                // phrasing, rather than stripped and rejoined with a dash.
+                text.append(". Solving time: ").append(result.solvingTime());
+            } else {
+                text.append(".");
+            }
+        } else {
+            String verdictText = result.verdict() == SolveResult.Verdict.CORRECT ? "correct" : "cooked";
+            text.append("Found ").append(result.solutionCount())
+                    .append(" solution").append(result.solutionCount() == 1 ? "" : "s");
+            if (result.solvingTime() != null) {
+                text.append(" in ").append(result.solvingTime());
+            } else {
+                text.append(".");
+            }
+            text.append(" The problem is ").append(verdictText).append(".");
         }
-        text.append(" \u2014 the problem is ").append(verdictText).append(".");
         summaryLabel.setText(text.toString());
 
         openOutputFileButton.setDisable(false);

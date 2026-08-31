@@ -29,7 +29,13 @@ public final class ProblemsOutParser {
     private static final Pattern SOLUTION_COUNT =
             Pattern.compile("Found (\\d+) solutions?\\. The problem is correct\\.");
     private static final Pattern COOKED_VERDICT = Pattern.compile("The problem is cooked\\.");
+    private static final Pattern NO_SOLUTION_VERDICT = Pattern.compile("The problem has no solution\\.");
     private static final Pattern SOLVING_TIME = Pattern.compile("Solving time:\\s*(.+)");
+    // Matches a Java stack trace frame after trimming, e.g.
+    // "at ch.stelvio.b.b.a.a.c.<init>(Unknown Source)" - Stelvio's own
+    // output is never shaped like this, so its presence is a reliable
+    // signal that we're looking at a raw, unhandled crash dump instead.
+    private static final Pattern STACK_TRACE_FRAME = Pattern.compile("^at\\s+\\S+\\(.*\\)$");
 
     private ProblemsOutParser() {
     }
@@ -39,25 +45,29 @@ public final class ProblemsOutParser {
     }
 
     static SolveResult parse(List<String> lines) {
-        int startIndex = indexOfMarker(lines);
-        if (startIndex < 0) {
-            throw new IllegalArgumentException(
-                    "Could not find \"" + FOUND_SOLUTIONS_MARKER + "\" in the output file - "
-                            + "is this a genuine Stelvio problems_out.txt?");
-        }
+        int markerIndex = indexOfMarker(lines);
+        boolean hasMarker = markerIndex >= 0;
+        int scanFrom = hasMarker ? markerIndex + 1 : 0;
 
         List<SolveResult.Solution> solutions = new ArrayList<>();
         SolveResult.Verdict verdict = null;
         Integer solutionCount = null;
         String solvingTime = null;
 
-        for (int i = startIndex + 1; i < lines.size(); i++) {
+        for (int i = scanFrom; i < lines.size(); i++) {
             String trimmed = lines.get(i).trim();
             if (trimmed.isEmpty()) {
                 continue;
             }
 
-            if (SOLUTION_LINE.matcher(trimmed).matches()) {
+            // Only treated as a move once we're confirmed past a genuine
+            // "Found solutions:" marker - without that guard, a line like
+            // "32.0              (15, 15)" (the pre-solve move-count/piece-
+            // count progress line, seen in every real sample BEFORE any
+            // marker) would falsely match this digit-dot pattern too, and
+            // MoveNotationParser would then choke trying to parse "(15,"
+            // as a move token.
+            if (hasMarker && SOLUTION_LINE.matcher(trimmed).matches()) {
                 List<Move> moves = MoveNotationParser.parseMoveList(trimmed);
                 solutions.add(new SolveResult.Solution(trimmed, moves));
                 continue;
@@ -75,6 +85,14 @@ public final class ProblemsOutParser {
                 continue;
             }
 
+            if (NO_SOLUTION_VERDICT.matcher(trimmed).find()) {
+                // A genuine, valid outcome - no "Found solutions:" marker
+                // ever appears in this case (confirmed from a real sample),
+                // so this can only ever be found via the whole-file scan.
+                verdict = SolveResult.Verdict.NO_SOLUTION;
+                continue;
+            }
+
             Matcher timeMatcher = SOLVING_TIME.matcher(trimmed);
             if (timeMatcher.find()) {
                 solvingTime = timeMatcher.group(1).trim();
@@ -82,13 +100,21 @@ public final class ProblemsOutParser {
         }
 
         if (verdict == null) {
+            // No recognizable verdict anywhere in the file - last resort,
+            // check whether this looks like a crash instead of just an
+            // unrecognized file.
+            StelvioCrashException crash = detectCrash(lines);
+            if (crash != null) {
+                throw crash;
+            }
             throw new IllegalArgumentException(
-                    "Could not find a verdict line (\"The problem is correct/cooked.\") in the output file.");
+                    "Could not find a recognizable verdict in the output file - "
+                            + "is this a genuine Stelvio problems_out.txt?");
         }
 
         // "Found N solutions." is sometimes absent entirely (confirmed real
-        // behavior for cooked results) - fall back to what we actually
-        // parsed, which is trustworthy either way.
+        // behavior for cooked results, and always true for NO_SOLUTION) -
+        // fall back to what we actually parsed, which is trustworthy either way.
         int finalCount = solutionCount != null ? solutionCount : solutions.size();
 
         return new SolveResult(solutions, verdict, finalCount, solvingTime);
@@ -101,5 +127,42 @@ public final class ProblemsOutParser {
             }
         }
         return -1;
+    }
+
+    /**
+     * Scans for a raw stack trace (Stelvio crashed before ever reaching
+     * "Found solutions:"), returning null if none is found so the caller
+     * falls back to the generic "unrecognized file" error instead.
+     */
+    private static StelvioCrashException detectCrash(List<String> lines) {
+        boolean hasStackFrame = false;
+        String headline = null;
+
+        for (String rawLine : lines) {
+            String trimmed = rawLine.trim();
+            if (trimmed.isEmpty()) {
+                continue;
+            }
+            if (STACK_TRACE_FRAME.matcher(trimmed).matches()) {
+                hasStackFrame = true;
+                continue;
+            }
+            if (headline == null && (trimmed.contains("Error") || trimmed.contains("Exception"))) {
+                headline = trimmed;
+            }
+        }
+
+        if (!hasStackFrame) {
+            return null;
+        }
+        if (headline != null && headline.contains("OutOfMemoryError")) {
+            return new StelvioCrashException(StelvioCrashException.Kind.OUT_OF_MEMORY,
+                    "Stelvio ran out of memory while solving this problem. Try increasing the RAM "
+                            + "setting and running again.");
+        }
+        return new StelvioCrashException(StelvioCrashException.Kind.UNKNOWN,
+                "Stelvio encountered an internal error while solving this problem"
+                        + (headline != null ? " (" + headline + ")" : "") + ". You may want to report "
+                        + "this to Stelvio's author with the problems_out.txt file attached.");
     }
 }
